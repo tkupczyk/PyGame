@@ -14,7 +14,6 @@ class Game:
         pygame.display.set_caption("Survivor")
         self.clock = pygame.time.Clock()
         self.running = True
-        
 
         # Groups
         self.all_sprites = AllSprites()
@@ -48,7 +47,6 @@ class Game:
                     surf = pygame.image.load(full_path).convert_alpha()
                     self.enemy_frames[folder].append(surf)
 
-
     def setup(self):
         map = load_pygame(join('Vampire survivor','data','maps','world.tmx'))
 
@@ -81,6 +79,19 @@ class Game:
             self.can_shoot = False
             self.shoot_time = pygame.time.get_ticks()
 
+    def bullet_collision(self):
+        if self.bullet_sprites:
+            for bullet in self.bullet_sprites:
+                collided_sprites = pygame.sprite.spritecollide(bullet, self.enemy_sprites, False, pygame.sprite.collide_mask)
+                if collided_sprites:
+                    for sprite in collided_sprites:
+                        sprite.destroy()
+                    bullet.kill()
+
+    def player_collision(self):
+        if pygame.sprite.spritecollide(self.player, self.enemy_sprites, False, pygame.sprite.collide_mask):
+            self.running = False
+
     def run(self):
         while self.running:
             dt = self.clock.tick() /1000  # delta time in seconds.
@@ -96,6 +107,8 @@ class Game:
             self.all_sprites.update(dt)
             self.input()
             self.gun_timer()
+            self.bullet_collision()
+            self.player_collision()
 
             # draw
             self.screen_surface.fill('black')
